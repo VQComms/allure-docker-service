@@ -934,8 +934,8 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
                     'failed_files_count': failed_files_count,
                     'processed_files': processed_files,
                     'processed_files_count': processed_files_count,
-                    'sent_files_count': sent_files_count,
-                    'environment_details_sent': environment_details_sent
+                    'sent_files_count': sent_files_count, 
+                    'environment_details_sent': environment_details_sent or "environment.properties" in processed_files
                     },
                 'meta_data': {
                     'message' : "Results successfully sent for project_id '{}'".format(project_id)
