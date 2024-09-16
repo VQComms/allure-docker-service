@@ -896,6 +896,9 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
             validated_results = validate_json_results(json_body['results'])
             send_json_results(results_project, validated_results, processed_files, failed_files)
 
+            if 'environment' in json_body:
+                send_environment_details(results_project, json_body['environment'])
+
         if content_type.startswith('multipart/form-data') is True:
             validated_results = validate_files_array(request.files.getlist('files[]'))
             send_files_results(results_project, validated_results, processed_files, failed_files)
@@ -1564,6 +1567,19 @@ def send_json_results(results_project, validated_results, processed_files, faile
         finally:
             if file is not None:
                 file.close()
+
+
+def send_environment_details(results_project, environment_entries):
+    environment_dict = json.loads(environment_entries)
+
+    file = open("%s/environment.properties" % results_project, "w")
+
+    for key, value in environment_dict.items():
+        file.write('{0}: {1}'.format(key, value))
+
+    if file is not None:
+        file.close()
+
 
 def create_project(json_body):
     if 'id' not in json_body:
