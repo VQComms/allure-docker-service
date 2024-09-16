@@ -1536,6 +1536,7 @@ def validate_json_results(results):
 
     return validated_results
 
+
 def send_files_results(results_project, validated_results, processed_files, failed_files):
     for file in validated_results:
         try:
@@ -1548,6 +1549,7 @@ def send_files_results(results_project, validated_results, processed_files, fail
             failed_files.append(error)
         else:
             processed_files.append(file_name)
+
 
 def send_json_results(results_project, validated_results, processed_files, failed_files):
     for result in validated_results:
@@ -1570,7 +1572,7 @@ def send_json_results(results_project, validated_results, processed_files, faile
 
 
 def send_environment_details(results_project, environment_entries):
-    environment_dict = json.loads(environment_entries)
+    environment_dict = json.load(environment_entries)
 
     file = open("%s/environment.properties" % results_project, "w")
 
