@@ -133,7 +133,7 @@ PROTECTED_ENDPOINTS = [
         "method": "delete",
         "path": "/projects/{id}",
         "endpoint": "delete_project_endpoint"
-    }
+    } 
 ]
 
 GENERATE_REPORT_PROCESS = '{}/generateAllureReport.sh'.format(os.environ['ROOT'])
