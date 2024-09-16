@@ -25,9 +25,13 @@ COPY allure-docker-api $ROOT_DIR/allure-docker-api
 RUN pylint --rcfile=allure-docker-api/.pylintrc allure-docker-api
 
 ######
-RUN echo "hello world"
+
+ARG PYTHON_VERSION=3.8
 
 FROM $ARCH/$JDK
+
+ARG PYTHON_VERSION=3.8
+
 ARG ARCH
 ARG JDK
 ARG BUILD_DATE
