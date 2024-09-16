@@ -25,6 +25,8 @@ COPY allure-docker-api $ROOT_DIR/allure-docker-api
 RUN pylint --rcfile=allure-docker-api/.pylintrc allure-docker-api
 
 ######
+RUN echo "hello world"
+
 FROM $ARCH/$JDK
 ARG ARCH
 ARG JDK
