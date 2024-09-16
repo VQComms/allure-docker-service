@@ -37,6 +37,8 @@ ARG UID
 ARG GID
 ARG PYTHON_VERSION=3.8
 
+RUN echo "hello world"
+
 LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.docker.dockerfile="docker-custom/Dockerfile.bionic-custom" \
     org.label-schema.license="MIT" \
