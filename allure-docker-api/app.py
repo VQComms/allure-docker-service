@@ -885,6 +885,8 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
         validated_results = []
         processed_files = []
         failed_files = []
+        environment_details_sent = False
+
         results_project = '{}/results'.format(get_project_path(project_id))
 
         if content_type.startswith('application/json') is True:
@@ -897,7 +899,8 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
             send_json_results(results_project, validated_results, processed_files, failed_files)
 
             if 'environment' in json_body:
-                send_environment_details(results_project, json_body['environment'])
+                send_environment_details(results_project, json_body['environment'], environment_details_sent)
+                environment_details_sent = True
 
         if content_type.startswith('multipart/form-data') is True:
             validated_results = validate_files_array(request.files.getlist('files[]'))
@@ -931,7 +934,8 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
                     'failed_files_count': failed_files_count,
                     'processed_files': processed_files,
                     'processed_files_count': processed_files_count,
-                    'sent_files_count': sent_files_count
+                    'sent_files_count': sent_files_count,
+                    'environment_details_sent': environment_details_sent
                     },
                 'meta_data': {
                     'message' : "Results successfully sent for project_id '{}'".format(project_id)
@@ -1571,13 +1575,18 @@ def send_json_results(results_project, validated_results, processed_files, faile
                 file.close()
 
 
-def send_environment_details(results_project, environment_entries):
-    environment_dict = json.load(environment_entries)
+def send_environment_details(results_project, environment_dict, environment_details_sent):
+    file = None
 
-    file = open("%s/environment.properties" % results_project, "w")
-
-    for key, value in environment_dict.items():
-        file.write('{0}: {1}'.format(key, value))
+    try:
+        file = open("%s/environment.properties" % results_project, "w")
+        for key, value in environment_dict.items():
+            file.write('{0}: {1}\n'.format(key, value))
+    except Exception as ex:
+        error = {}
+        error['message'] = str(ex)
+    else:
+        environment_details_sent = True
 
     if file is not None:
         file.close()
