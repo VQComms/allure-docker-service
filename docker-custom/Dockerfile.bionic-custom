@@ -9,29 +9,7 @@ ARG UID=1000
 ARG GID=1000
 ARG PYTHON_VERSION=3.8
 
-######
-
-FROM python:${PYTHON_VERSION}-alpine AS dev_stage
-RUN apk update
-RUN apk add build-base
-RUN pip install -U pylint
-RUN pip install --upgrade pip setuptools wheel waitress && \
-    pip install -Iv Flask==3.0.2 Flask-JWT-Extended==4.6.0 flask-swagger-ui==4.11.1 requests==2.31.0
-
-ENV ROOT_DIR=/code
-RUN mkdir -p $ROOT_DIR
-WORKDIR $ROOT_DIR
-COPY allure-docker-api $ROOT_DIR/allure-docker-api
-RUN pylint --rcfile=allure-docker-api/.pylintrc allure-docker-api
-
-######
-
-ARG PYTHON_VERSION=3.8
-
 FROM $ARCH/$JDK
-
-ARG PYTHON_VERSION=3.8
-
 ARG ARCH
 ARG JDK
 ARG BUILD_DATE
