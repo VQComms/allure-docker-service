@@ -1400,7 +1400,7 @@ arch: x86_64
 {
   "Results": [
     {
-      "content_base64" :"[Base64 encoding of file]"„
+      "content_base64" :"[Base64 encoding of file]",
       "file_name": "6e5c7e5d-4e5d-4d5d-b67e-40b8e8e7d56e-container json"
     },
     ... any other results files ...
@@ -1420,7 +1420,7 @@ Instead of attaching the environment details in the results entry, you can defin
 {
   "Results": [
     {
-      "content_base64" :"[Base64 encoding of file]"„
+      "content_base64" :"[Base64 encoding of file]",
       "file_name": "6e5c7e5d-4e5d-4d5d-b67e-40b8e8e7d56e-container json"
     },
     ... any other results files ...
