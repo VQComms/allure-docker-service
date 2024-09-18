@@ -1,4 +1,76 @@
+[![](resources/allure.png)](http://allure.qatools.ru/)
+[![](resources/docker.png)](https://docs.docker.com/)
+
 # ALLURE DOCKER SERVICE
+[![](https://github.com/fescobar/allure-docker-service/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/fescobar/allure-docker-service/actions?query=branch%3Amaster)
+
+![](https://img.shields.io/docker/pulls/frankescobar/allure-docker-service)
+
+Table of contents
+=================
+   * [FEATURES](#FEATURES)
+      * [Docker Hub](#docker-hub)
+      * [Docker Versions](#docker-versions)
+   * [USAGE](#USAGE)
+      * [Generate Allure Results](#generate-allure-results)
+      * [ALLURE DOCKER SERVICE](#allure-docker-service-1)
+          * [SINGLE PROJECT - LOCAL REPORTS](#SINGLE-PROJECT---LOCAL-REPORTS)
+            * [Single Project - Docker on Unix/Mac](#single-project---docker-on-unixmac)
+            * [Single Project - Docker on Windows (Git Bash)](#single-project---docker-on-windows-git-bash)
+            * [Single Project - Docker Compose](#single-project---docker-compose)
+          * [MULTIPLE PROJECTS - REMOTE REPORTS](#MULTIPLE-PROJECTS---REMOTE-REPORTS)
+            * [Multiple Project - Docker on Unix/Mac](#multiple-project---docker-on-unixmac)
+            * [Multiple Project - Docker on Windows (Git Bash)](#multiple-project---docker-on-windows-git-bash)
+            * [Multiple Project - Docker Compose](#multiple-project---docker-compose)
+            * [Creating our first project](#creating-our-first-project)
+      * [PORT 4040 Deprecated](#port-4040-deprecated)
+      * [Known Issues](#known-issues)
+      * [Opening & Refreshing Report](#opening--refreshing-report)
+      * [New User Interface](#new-user-interface)
+      * [Deploy using Kubernetes](#deploy-using-kubernetes)
+      * [Extra options](#extra-options)
+          * [Allure API](#allure-api)
+            * [Info Endpoints](#info-endpoints)
+            * [Action Endpoints](#action-endpoints)
+            * [Project Endpoints](#project-endpoints)
+          * [Send results through API](#send-results-through-api)
+            * [Content-Type - application/json](#content-type---applicationjson)
+            * [Content-Type - multipart/form-data](#content-type---multipartform-data)
+            * [Force Project Creation Option](#force-project-creation-option)
+          * [Customize Executors Configuration](#customize-executors-configuration)
+          * [API Response Less Verbose](#api-response-less-verbose)
+          * [Switching version](#switching-version)
+          * [Switching port](#switching-port)
+          * [Updating seconds to check Allure Results](#updating-seconds-to-check-allure-results)
+          * [Keep History and Trends](#keep-history-and-trends)
+          * [Override User Container](#override-user-container)
+          * [Start in DEV Mode](#start-in-dev-mode)
+          * [Enable TLS](#enable-tls)
+          * [Enable Security](#enable-security)
+            * [Login](#login)
+            * [X-CSRF-TOKEN](#x-csrf-token)
+            * [Refresh Access Token](#refresh-access-token)
+            * [Logout](#logout)
+            * [Roles](#roles)
+            * [Make Viewer endpoints public](#make-viewer-endpoints-public)
+            * [Scripts](#scripts)
+          * [Multi-instance Setup](#multi-instance-setup)
+          * [Add Custom URL Prefix](#add-custom-url-prefix)
+          * [Optimize Storage](#optimize-storage)
+          * [Export Native Full Report](#export-native-full-report)
+          * [Customize Emailable Report](#customize-emailable-report)
+              * [Override CSS](#override-css)
+              * [Override title](#override-title)
+              * [Override server link](#override-server-link)
+              * [Develop a new template](#develop-a-new-template)
+          * [Allure Customized Plugins](#allure-customized-plugins)
+          * [Allure Options](#allure-options)
+   * [SUPPORT](#SUPPORT)
+      * [Gitter](#gitter)
+   * [DOCKER GENERATION (Usage for developers)](#docker-generation-usage-for-developers)
+   * [Runner Environment Details)](#runner-environment-details)
+      * [Old Method: environment.properties Approach](#old-method-environment-properties-approach)
+      * [New Method: Separate JSON Entry Approach](#new-method-separate-json-entry-approach)
 
 ## FEATURES
 Allure Framework provides you good looking reports for automation testing.
@@ -1386,7 +1458,7 @@ Below are the features implemented specifically for VQ's Allure-Docker API. Thes
 ### Runner Environment Details
 Allure allows you to attach environmental information to the reports, as illustrated in the [Allure documentation](https://allurereport.org/docs/how-it-works-environment-file/). We can add to the reports hosted in our containers using one of two ways, as shown below. 
 
-#### Older method, used by original Allure Docker Service implementation 
+#### Old Method: environment.properties Approach 
 The original allure-docker service has the option to send environmental information along with results by doing the following: 
 - Create a file named `environment.properties` of the relevant allure results folder following a test run (before sending the results to the API).
 - This file should be populated as an undecorated series of entries for each piece of environmental information to be displayed on the reports.
@@ -1414,8 +1486,8 @@ arch: x86_64
 
 However, we found that this approach is somewhat buggy with the existing implementation. It also groups results with environmental information, which is not ideal since environment details are not results themselves, only extraneous information related to the test run. So we added a new method of submitting the environment details, as shown below.
 
-#### New method, implemented only for the VQ Allure Docker Service 
-Instead of attaching the environment details in the results entry, you can define the `environment` entry alongside the `results` entry. This entry should be a JSON dictionary with any relevant environmental details, similar to how it was structured in the `environment.properties` file above. So your request body should look something like this:
+#### New method: Separate JSON Entry Approach
+This method was implemented specifically for VQ. Instead of attaching the environment details in the results entry, you can define the `environment` entry alongside the `results` entry. This entry should be a JSON dictionary with any relevant environmental details, similar to how it was structured in the `environment.properties` file above. So your request body should look something like this:
 ```JSON
 {
   "Results": [
