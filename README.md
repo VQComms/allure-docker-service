@@ -68,9 +68,10 @@ Table of contents
    * [SUPPORT](#SUPPORT)
       * [Gitter](#gitter)
    * [DOCKER GENERATION (Usage for developers)](#docker-generation-usage-for-developers)
-   * [Runner Environment Details)](#runner-environment-details)
-      * [Old Method: environment.properties Approach](#old-method-environment-properties-approach)
-      * [New Method: Separate JSON Entry Approach](#new-method-separate-json-entry-approach)
+   * [VQ Features](#vq-features)
+     * [Runner Environment Details](#runner-environment-details)
+        * [Old Method: environment.properties Approach](#old-method-environmentproperties-approach)
+        * [New Method: Separate JSON Entry Approach](#new-method-separate-json-entry-approach)
 
 ## FEATURES
 Allure Framework provides you good looking reports for automation testing.
