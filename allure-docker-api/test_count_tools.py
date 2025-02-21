@@ -23,11 +23,11 @@ def count_matching_files(directory, search_string, logger = None):
 def count_passed_result_files(results_dir, logger):
     return count_matching_files(results_dir, '\"status\": \"passed\"', logger)
 
-def count_failed_result_files(results_dir):
-    return count_matching_files(results_dir, '\"status\": \"failed\"')
+def count_failed_result_files(results_dir, logger):
+    return count_matching_files(results_dir, '\"status\": \"failed\"', logger)
 
-def count_skipped_result_files(results_dir):
-    return count_matching_files(results_dir, '\"status\": \"skipped\"')
+def count_skipped_result_files(results_dir, logger):
+    return count_matching_files(results_dir, '\"status\": \"skipped\"', logger)
 
 def count_total_result_files(results_dir):
     return [f for f in os.listdir(results_dir) if '-result.json' in f]

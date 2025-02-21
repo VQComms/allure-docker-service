@@ -1710,10 +1710,10 @@ def write_test_counts_to_files(project_id, results_project):
         f.write(test_count_tools.count_passed_result_files(results_project, LOGGER))
 
     with open(fail_count_file, 'w') as f:
-        f.write(test_count_tools.count_failed_result_files(results_project))
+        f.write(test_count_tools.count_failed_result_files(results_project, LOGGER))
 
     with open(skipped_count_file, 'w') as f:
-        f.write(test_count_tools.count_skipped_result_files(results_project))
+        f.write(test_count_tools.count_skipped_result_files(results_project, LOGGER))
 
     with open(total_count_file, 'w') as f:
         f.write(test_count_tools.count_total_result_files(results_project))
