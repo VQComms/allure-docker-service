@@ -2,6 +2,7 @@ from re import search
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 import requests
+import datetime
 
 def generate_slack_message(project_name, report_url, project_generation_timestamp, total_test_count, total_pass_count,
                            total_fail_count, total_skipped_count, overall_pass_rate, total_test_run_period, watchers_list):
@@ -68,14 +69,12 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
                               skipped_count, total_count):
     try:
         project_name = search(r'/projects/([^/]+)/reports/', report_url)
-        passed_count = passed_count
-        failed_count = failed_count
-        total_test_count = total_count
-        pass_rate = (float(passed_count) / total_test_count) * 100
+        pass_rate = (float(passed_count) / total_count) * 100
         watchers_list = []
+        project_generation_timestamp = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
         
         #todo: add skip_count
-        slack_message = generate_slack_message(project_name, report_url, "some time ago", total_test_count, passed_count,
+        slack_message = generate_slack_message(project_name, report_url, project_generation_timestamp, total_count, passed_count,
                                                failed_count, skipped_count, pass_rate, "ages", watchers_list)
         
         client = WebClient(token=bearer_token)
