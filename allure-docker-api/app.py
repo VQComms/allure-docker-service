@@ -1049,7 +1049,7 @@ def generate_report_endpoint():
         resp.status_code = 200
 
 #todo: add option to disable the summary being sent and parse it in generate-endpoint query string 
-    if report_url is not "":
+    if report_url != "":
         slack_channel_name = os.getenv('SLACK_SUMMARY_CHANNEL_NAME')
         if slack_channel_name is None:
             raise Exception("SLACK_SUMMARY_CHANNEL_NAME is not defined in system environment variables. Please set this to match the name of the slack channel used for updates.")
