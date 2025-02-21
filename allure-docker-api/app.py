@@ -1065,10 +1065,10 @@ def generate_report_endpoint():
         
         write_test_counts_to_files(project_id, results_project, LOGGER)
          
-        passed_count = read_count_from_file(get_project_pass_count_filepath(project_id))
-        failed_count = read_count_from_file(get_project_fail_count_filepath(project_id))
-        skipped_count = read_count_from_file(get_project_fail_count_filepath(project_id))
-        total_count = get_project_total_count_filepath(get_project_total_count_filepath(project_id))
+        passed_count = read_count_from_file(get_test_count_filepath(project_id, "pass"))
+        failed_count = read_count_from_file(get_test_count_filepath(project_id, "fail"))
+        skipped_count = read_count_from_file(get_test_count_filepath(project_id, "skip"))
+        total_count = read_count_from_file(get_test_count_filepath(project_id, "total"))
 #todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
         slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER,
                                                           passed_count, failed_count, skipped_count, total_count)
@@ -1683,28 +1683,16 @@ def get_projects_filtered_by_id(project_id, projects):
 def get_project_path(project_id):
     return '{}/{}'.format(PROJECTS_DIRECTORY, project_id)
 
-#todo: this could all be one function - just pass in the filename var
-def get_project_pass_count_filepath(project_id):
+def get_test_count_filepath(project_id, prefix):
     project_path = get_project_path(project_id)
-    return '{}/pass_count.txt'.format(project_path)
+    return f'{project_path}/{prefix}_count.txt'
 
-def get_project_fail_count_filepath(project_id):
-    project_path = get_project_path(project_id)
-    return '{}/fail_count.txt'.format(project_path)
-
-def get_project_skip_count_filepath(project_id):
-    project_path = get_project_path(project_id)
-    return '{}/skip_count.txt'.format(project_path)
-
-def get_project_total_count_filepath(project_id):
-    project_path = get_project_path(project_id)
-    return '{}/total_count.txt'.format(project_path)
 
 def write_test_counts_to_files(project_id, results_project, logger):
-    pass_count_file = get_project_pass_count_filepath(project_id)
-    fail_count_file = get_project_fail_count_filepath(project_id)
-    skipped_count_file = get_project_skip_count_filepath(project_id)
-    total_count_file = get_project_skip_count_filepath(project_id)
+    pass_count_file = get_test_count_filepath(project_id, "pass")
+    fail_count_file = get_test_count_filepath(project_id, "fail")
+    skipped_count_file = get_test_count_filepath(project_id, "skip")
+    total_count_file = get_test_count_filepath(project_id, "total")
 
     with open(pass_count_file, 'w') as f:
         f.write(str(test_count_tools.count_passed_result_files(results_project, logger)))

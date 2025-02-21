@@ -30,7 +30,7 @@ def count_skipped_result_files(results_dir, logger):
     return count_matching_files(results_dir, '\"status\": \"skipped\"', logger)
 
 def count_total_result_files(results_dir):
-    return [f for f in os.listdir(results_dir) if '-result.json' in f]
+    return len([f for f in os.listdir(results_dir) if '-result.json' in f])
 
 def read_count_from_file(file_path):
     with open(file_path, 'r') as f:
