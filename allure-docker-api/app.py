@@ -15,6 +15,8 @@ import subprocess
 import zipfile
 import requests
 import waitress
+import slack
+from slack_sdk.errors import SlackApiError
 from werkzeug.utils import secure_filename
 from flask import (
     Flask, jsonify, render_template, redirect,
@@ -1050,15 +1052,15 @@ def generate_report_endpoint():
 
 #todo: add option to disable the summary being sent and parse it in generate-endpoint query string 
     if report_url != "":
-        slack_channel_name = os.getenv('SLACK_SUMMARY_CHANNEL_NAME')
-        if slack_channel_name is None:
-            raise Exception("SLACK_SUMMARY_CHANNEL_NAME is not defined in system environment variables. Please set this to match the name of the slack channel used for updates.")
+        slack_channel_id = os.getenv('SLACK_SUMMARY_CHANNEL_ID')
+        if slack_channel_id is None:
+            raise Exception("SLACK_SUMMARY_CHANNEL_ID is not defined in system environment variables. Please set this to match the name of the slack channel used for updates.")
 
         slack_bearer_token = os.getenv('SLACK_BEARER_TOKEN')
         if slack_bearer_token is None:
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
-        send_summary_to_slack_app(report_url, slack_channel_name, slack_bearer_token)
+        send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token)
 
     return resp
 
@@ -1699,23 +1701,18 @@ def check_process(process_file, project_id):
         raise Exception("Processing files for project_id '{}'. Try later!".format(project_id))
 
 #todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
-def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
+def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token):
     try:
-        url = "https://slack.com/api/chat.postMessage"  # URL for the slack app
-        headers = {
-            "Authorization": f"Bearer {bearer_token}",
-            "Content-Type": "text/plain",
-        }
+        client = slack.WebClient(token=bearer_token)
 
-        data= f"text=Report generated at {report_url}&channel={slack_channel_name}"
+        result = client.chat_postMessage(
+            channel=slack_channel_id,
+            text=f"Report generated for {report_url}"
+        )
 
-        # Post to our slack test summary bot - summary message will appear in relevant channel of VQ Slack 
-        LOGGER.info(f'Posting test summary info for report {report_url} to slack app with url {url}. Data: {data}')
-        response = requests.post(url, headers=headers, data=data)
-        LOGGER.info(f'Slack app response code: {response.status_code}')
-        LOGGER.info(f'Slack app response text: {response.text}')
-    except ex as e:
-        print(f"Could not send summary to slack app, see {e} for exception.")
+    except SlackApiError as e:
+        LOGGER.info(f"Error sending sumamry to slack app: {e}")
+
     return
 
 if __name__ == '__main__':
