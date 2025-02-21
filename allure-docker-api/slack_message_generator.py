@@ -18,15 +18,15 @@ def generate_slack_message(project_name, report_url, project_generation_timestam
                     "type": "mrkdwn",
                     "text": (
                         f"Test report generated for project *{project_name}*\n"
-                        f"📄 *Report URL:* <{report_url}|View Report>\n"
+                        f"📄 *Report URL:* {report_url}\n"
                         f"🕒 *Generated at:* {project_generation_timestamp}\n"
                         f"📊 *Total number of tests:* {total_test_count}\n"
                         f"✅ *Total Passed:* {total_pass_count}\n"
                         f"❌ *Total Failed:* {total_fail_count}\n"
                         f"💨 *Total Skipped:* {total_skipped_count}\n"
                         f"📈 *Pass rate overall:* {overall_pass_rate:.2f}%\n"
-                        f"⏳ *Time taken for test run:* {total_test_run_period}\n"
-                        f"👥 *FAO:* {watchers_list}\n"
+    #todo:                   f"⏳ *Time taken for test run:* {total_test_run_period}\n"
+    #todo:                   f"👥 *FAO:* {watchers_list}\n"
                     )
                 }
             },
@@ -42,25 +42,25 @@ def generate_slack_message(project_name, report_url, project_generation_timestam
                         },
                         "url": report_url,  # Makes the button clickable to the report URL
                         "action_id": "see_report"
-                    },
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Add me to Watchers",
-                            "emoji": True
-                        },
-                        "action_id": "add_watcher"
-                    },
-                    {
-                        "type": "button",
-                        "text": {
-                            "type": "plain_text",
-                            "text": "Remove me from Watchers",
-                            "emoji": True
-                        },
-                        "action_id": "remove_watcher"
                     }
+                    #todo: {
+                    #     "type": "button",
+                    #     "text": {
+                    #         "type": "plain_text",
+                    #         "text": "Add me to Watchers",
+                    #         "emoji": True
+                    #     },
+                    #     "action_id": "add_watcher"
+                    # },
+                    # {
+                    #     "type": "button",
+                    #     "text": {
+                    #         "type": "plain_text",
+                    #         "text": "Remove me from Watchers",
+                    #         "emoji": True
+                    #     },
+                    #     "action_id": "remove_watcher"
+                    # }
                 ]
             }
         ]
