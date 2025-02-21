@@ -68,7 +68,7 @@ def generate_slack_message(project_name, report_url, project_generation_timestam
 def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger, passed_count, failed_count,
                               skipped_count, total_count):
     try:
-        project_name = search(r'/projects/([^/]+)/reports/', report_url)
+        project_name = search(r'/projects/([^/]+)/reports/', report_url).group(1)
         pass_rate = (float(passed_count) / float(total_count)) * 100
         watchers_list = []
         project_generation_timestamp = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
