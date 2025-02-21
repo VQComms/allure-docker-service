@@ -1,7 +1,7 @@
 import os
 import re
 
-def count_matching_files(directory, search_string, logger):
+def count_matching_files(directory, search_string, logger = None):
     match_count = 0
     pattern = re.compile(re.escape(search_string))  # Compile regex for efficient searching
 
