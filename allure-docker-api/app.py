@@ -1704,13 +1704,14 @@ def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
         url = "https://slack.com/api/chat.postMessage"  # URL for the slack app
         headers = {
             "Authorization": f"Bearer {bearer_token}",
-            "Content-Type": "application/json",
+            "Content-Type": "text/plain",
         }
-        data=json.dumps(f'-d "text=Report generated at {report_url}." -d "channel={slack_channel_name}"')
+
+        data= f"text=Report generated at {report_url}&channel={slack_channel_name}"
 
         # Post to our slack test summary bot - summary message will appear in relevant channel of VQ Slack 
         LOGGER.info(f'Posting test summary info for report {report_url} to slack app with url {url}. Data: {data}')
-        response = requests.post(url, headers=headers, json=data)
+        response = requests.post(url, headers=headers, data=data)
         LOGGER.info(f'Slack app response code: {response.status_code}')
         LOGGER.info(f'Slack app response text: {response.text}')
     except ex as e:
