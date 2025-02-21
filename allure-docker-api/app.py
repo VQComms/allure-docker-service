@@ -1699,7 +1699,6 @@ def check_process(process_file, project_id):
         raise Exception("Processing files for project_id '{}'. Try later!".format(project_id))
 
 #todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
-#todo: tighten up error handling and give proper error messages 
 def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
     try:
         url = "https://slack.com/api/chat.postMessage"  # URL for the slack app
@@ -1710,12 +1709,13 @@ def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
         data=json.dumps(f'-d "text=Report generated at {report_url}." -d "channel={slack_channel_name}"')
 
         # Post to our slack test summary bot - summary message will appear in relevant channel of VQ Slack 
+        LOGGER.info(f'Posting test summary info for report {report_url} to slack app with url {url}. Data: {data}')
         response = requests.post(url, headers=headers, json=data)
-        print(response.status_code)
-        print(response.text)
-
+        LOGGER.info(f'Slack app response code: {response.status_code}')
+        LOGGER.info(f'Slack app response text: {response.text}')
     except ex as e:
         print(f"Could not send summary to slack app, see {e} for exception.")
+    return
 
 if __name__ == '__main__':
     if DEV_MODE == 1:
