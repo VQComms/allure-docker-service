@@ -16,6 +16,7 @@ import zipfile
 import requests
 import waitress
 import slack_message_generator
+import test_count_tools
 from werkzeug.utils import secure_filename
 from flask import (
     Flask, jsonify, render_template, redirect,
@@ -28,6 +29,8 @@ from flask_jwt_extended import (
     get_jwt_identity, verify_jwt_in_request, get_jwt,
     set_access_cookies, set_refresh_cookies, unset_jwt_cookies
 )
+
+from test_count_tools import read_count_from_file
 
 dictConfig({
     'version': 1,
@@ -852,6 +855,7 @@ def latest_report_endpoint():
         resp.status_code = 400
         return resp
 
+#todo: add recording of pass fail rates - could do it when results are sent, then log to a file if we wanted to (we could also populate the whole slack_message and store it for sending if we wanted to) 
 @app.route("/send-results", methods=['POST'], strict_slashes=False)
 @app.route("/allure-docker-service/send-results", methods=['POST'], strict_slashes=False)
 @jwt_required
@@ -953,7 +957,6 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
 
         resp = jsonify(body)
         resp.status_code = 200
-
     return resp
 
 @app.route("/generate-report", strict_slashes=False)
@@ -1050,7 +1053,7 @@ def generate_report_endpoint():
         resp.status_code = 200
 
 #todo: add option to disable the summary being sent and parse it in generate-endpoint query string 
-    if report_url != "":
+    if report_url != "" and project_id is not None:
         slack_channel_id = os.getenv('SLACK_SUMMARY_CHANNEL_ID')
         if slack_channel_id is None:
             raise Exception("SLACK_SUMMARY_CHANNEL_ID is not defined in system environment variables. Please set this to match the name of the slack channel used for updates.")
@@ -1059,8 +1062,16 @@ def generate_report_endpoint():
         if slack_bearer_token is None:
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
+        
+        write_test_counts_to_files(project_id, results_project)
+         
+        passed_count = read_count_from_file(get_project_pass_count_filepath(project_id))
+        failed_count = read_count_from_file(get_project_fail_count_filepath(project_id))
+        skipped_count = read_count_from_file(get_project_fail_count_filepath(project_id))
+        total_count = get_project_total_count_filepath(get_project_total_count_filepath(project_id))
 #todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
-        slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER)
+        slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER,
+                                                          passed_count, failed_count, skipped_count, total_count)
 
     return resp
 
@@ -1671,6 +1682,41 @@ def get_projects_filtered_by_id(project_id, projects):
 
 def get_project_path(project_id):
     return '{}/{}'.format(PROJECTS_DIRECTORY, project_id)
+
+#todo: this could all be one function - just pass in the filename var
+def get_project_pass_count_filepath(project_id):
+    project_path = get_project_path(project_id)
+    return '{}/pass_count.txt'.format(project_path)
+
+def get_project_fail_count_filepath(project_id):
+    project_path = get_project_path(project_id)
+    return '{}/fail_count.txt'.format(project_path)
+
+def get_project_skip_count_filepath(project_id):
+    project_path = get_project_path(project_id)
+    return '{}/skip_count.txt'.format(project_path)
+
+def get_project_total_count_filepath(project_id):
+    project_path = get_project_path(project_id)
+    return '{}/total_count.txt'.format(project_path)
+
+def write_test_counts_to_files(project_id, results_project):
+    pass_count_file = get_project_pass_count_filepath(project_id)
+    fail_count_file = get_project_fail_count_filepath(project_id)
+    skipped_count_file = get_project_skip_count_filepath(project_id)
+    total_count_file = get_project_skip_count_filepath(project_id)
+
+    with open(pass_count_file, 'w') as f:
+        f.write(test_count_tools.count_passed_result_files(results_project))
+
+    with open(fail_count_file, 'w') as f:
+        f.write(test_count_tools.count_failed_result_files(results_project))
+
+    with open(skipped_count_file, 'w') as f:
+        f.write(test_count_tools.count_skipped_result_files(results_project))
+
+    with open(total_count_file, 'w') as f:
+        f.write(test_count_tools.count_total_result_files(results_project))
 
 def resolve_project(project_id_param):
     project_id = 'default'
