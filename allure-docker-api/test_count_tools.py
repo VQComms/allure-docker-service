@@ -20,6 +20,8 @@ def count_matching_files(directory, search_string, logger = None):
             except Exception as e:
                 print(f"Skipping {file_path}: {e}")  # Handle errors like permission issues
 
+    return match_count
+
 def count_passed_result_files(results_dir, logger):
     return count_matching_files(results_dir, '\"status\": \"passed\"', logger)
 
