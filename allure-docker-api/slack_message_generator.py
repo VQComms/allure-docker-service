@@ -4,6 +4,7 @@ from slack_sdk.errors import SlackApiError
 import requests
 import datetime
 
+#todo: add standard text representation for good practice - see docker api container logs at point of sending request
 def generate_slack_message(project_name, report_url, project_generation_timestamp, total_test_count, total_pass_count,
                            total_fail_count, total_skipped_count, overall_pass_rate, total_test_run_period, watchers_list):
     return {
@@ -69,7 +70,12 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
                               skipped_count, total_count):
     try:
         project_name = search(r'/projects/([^/]+)/reports/', report_url).group(1)
-        pass_rate = (float(passed_count) / float(total_count)) * 100
+        
+        if int(total_count) == 0:
+            pass_rate = 0
+        else:
+            pass_rate = (float(passed_count) / float(total_count)) * 100
+
         watchers_list = []
         project_generation_timestamp = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
         
