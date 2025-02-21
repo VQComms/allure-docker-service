@@ -1,10 +1,4 @@
-[![](resources/allure.png)](http://allure.qatools.ru/)
-[![](resources/docker.png)](https://docs.docker.com/)
-
-# ALLURE DOCKER SERVICE
-[![](https://github.com/fescobar/allure-docker-service/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/fescobar/allure-docker-service/actions?query=branch%3Amaster)
-
-![](https://img.shields.io/docker/pulls/frankescobar/allure-docker-service)
+#  ALLURE DOCKER SERVICE
 
 Table of contents
 =================
@@ -68,6 +62,10 @@ Table of contents
    * [SUPPORT](#SUPPORT)
       * [Gitter](#gitter)
    * [DOCKER GENERATION (Usage for developers)](#docker-generation-usage-for-developers)
+   * [VQ Features](#vq-features)
+     * [Runner Environment Details](#runner-environment-details)
+        * [Old Method: environment.properties Approach](#old-method-environmentproperties-approach)
+        * [New Method: Separate JSON Entry Approach](#new-method-separate-json-entry-approach)
 
 ## FEATURES
 Allure Framework provides you good looking reports for automation testing.
@@ -1448,3 +1446,59 @@ docker run -d  -p 5050:5050 frankescobar/allure-docker-service
 ```sh
 docker run -d -p 5050:5050 frankescobar/allure-docker-service:2.27.0
 ```
+
+## VQ Features
+Below are the features implemented specifically for VQ's Allure-Docker API. These have been added as needed for more accurate/easier reporting of relevant information.
+
+### Runner Environment Details
+Allure allows you to attach environmental information to the reports, as illustrated in the [Allure documentation](https://allurereport.org/docs/how-it-works-environment-file/). We can add to the reports hosted in our containers using one of two ways, as shown below. 
+
+#### Old Method: environment.properties Approach 
+The original allure-docker service has the option to send environmental information along with results by doing the following: 
+- Create a file named `environment.properties` of the relevant allure results folder following a test run (before sending the results to the API).
+- This file should be populated as an undecorated series of entries for each piece of environmental information to be displayed on the reports.
+- A sample file looks like this:
+```
+os: Ubuntu-20.04
+arch: x86_64
+```
+- When sending the results via JSON, you can append the environment.properties file in the same way you would for other results files. So you'll need to convert the contents to base64 encoding and give the file a title. The title _must_ be `environment.properties' with no pre- or suffix. So the entry would look something like this:
+```JSON
+{
+  "Results": [
+    {
+      "content_base64" :"[Base64 encoding of file]",
+      "file_name": "6e5c7e5d-4e5d-4d5d-b67e-40b8e8e7d56e-container json"
+    },
+    ... any other results files ...
+    {
+      "content_base64" : "dGVzdDogc2hpdA==",
+      "file_name": "environment.properties"
+    }
+  ]
+}
+```
+
+However, we found that this approach is somewhat buggy with the existing implementation. It also groups results with environmental information, which is not ideal since environment details are not results themselves, only extraneous information related to the test run. So we added a new method of submitting the environment details, as shown below.
+
+#### New method: Separate JSON Entry Approach
+This method was implemented specifically for VQ. Instead of attaching the environment details in the results entry, you can define the `environment` entry alongside the `results` entry. This entry should be a JSON dictionary with any relevant environmental details, similar to how it was structured in the `environment.properties` file above. So your request body should look something like this:
+```JSON
+{
+  "Results": [
+    {
+      "content_base64" :"[Base64 encoding of file]",
+      "file_name": "6e5c7e5d-4e5d-4d5d-b67e-40b8e8e7d56e-container json"
+    },
+    ... any other results files ...
+  ],
+  "environment": {
+    "os": "Ubuntu-20.04",
+    "arch": "x86_64"
+  }
+}
+```
+
+This information will be stored alongside the report in the same manner of the above approach. This makes the requests more readable and helps to separate out the environmental information from results data. 
+
+Environmental information only needs to be submitted once per report, i.e. should only be sent once before the next `/generate-report` call to the API . 
