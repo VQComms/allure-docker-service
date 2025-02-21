@@ -15,7 +15,7 @@ import subprocess
 import zipfile
 import requests
 import waitress
-import slack
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 from werkzeug.utils import secure_filename
 from flask import (
@@ -1703,9 +1703,9 @@ def check_process(process_file, project_id):
 #todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
 def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token):
     try:
-        client = slack.WebClient(token=bearer_token)
+        client = WebClient(token=bearer_token)
 
-        result = client.chat_postMessage(
+        client.chat_postMessage(
             channel=slack_channel_id,
             text=f"Report generated for {report_url}"
         )
