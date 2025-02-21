@@ -1063,7 +1063,7 @@ def generate_report_endpoint():
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
         
-        write_test_counts_to_files(project_id, results_project)
+        write_test_counts_to_files(project_id, results_project, LOGGER)
          
         passed_count = read_count_from_file(get_project_pass_count_filepath(project_id))
         failed_count = read_count_from_file(get_project_fail_count_filepath(project_id))
@@ -1707,7 +1707,7 @@ def write_test_counts_to_files(project_id, results_project):
     total_count_file = get_project_skip_count_filepath(project_id)
 
     with open(pass_count_file, 'w') as f:
-        f.write(test_count_tools.count_passed_result_files(results_project))
+        f.write(test_count_tools.count_passed_result_files(results_project, LOGGER))
 
     with open(fail_count_file, 'w') as f:
         f.write(test_count_tools.count_failed_result_files(results_project))
