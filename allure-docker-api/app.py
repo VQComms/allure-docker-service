@@ -15,8 +15,7 @@ import subprocess
 import zipfile
 import requests
 import waitress
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
+import slack_message_generator
 from werkzeug.utils import secure_filename
 from flask import (
     Flask, jsonify, render_template, redirect,
@@ -1060,7 +1059,8 @@ def generate_report_endpoint():
         if slack_bearer_token is None:
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
-        send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token)
+#todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
+        slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER)
 
     return resp
 
@@ -1701,19 +1701,7 @@ def check_process(process_file, project_id):
         raise Exception("Processing files for project_id '{}'. Try later!".format(project_id))
 
 #todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
-def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token):
-    try:
-        client = WebClient(token=bearer_token)
 
-        client.chat_postMessage(
-            channel=slack_channel_id,
-            text=f"Report generated for {report_url}"
-        )
-
-    except SlackApiError as e:
-        LOGGER.info(f"Error sending sumamry to slack app: {e}")
-
-    return
 
 if __name__ == '__main__':
     if DEV_MODE == 1:
