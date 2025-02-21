@@ -1700,20 +1700,20 @@ def get_project_total_count_filepath(project_id):
     project_path = get_project_path(project_id)
     return '{}/total_count.txt'.format(project_path)
 
-def write_test_counts_to_files(project_id, results_project):
+def write_test_counts_to_files(project_id, results_project, logger):
     pass_count_file = get_project_pass_count_filepath(project_id)
     fail_count_file = get_project_fail_count_filepath(project_id)
     skipped_count_file = get_project_skip_count_filepath(project_id)
     total_count_file = get_project_skip_count_filepath(project_id)
 
     with open(pass_count_file, 'w') as f:
-        f.write(test_count_tools.count_passed_result_files(results_project, LOGGER))
+        f.write(test_count_tools.count_passed_result_files(results_project, logger))
 
     with open(fail_count_file, 'w') as f:
-        f.write(test_count_tools.count_failed_result_files(results_project, LOGGER))
+        f.write(test_count_tools.count_failed_result_files(results_project, logger))
 
     with open(skipped_count_file, 'w') as f:
-        f.write(test_count_tools.count_skipped_result_files(results_project, LOGGER))
+        f.write(test_count_tools.count_skipped_result_files(results_project, logger))
 
     with open(total_count_file, 'w') as f:
         f.write(test_count_tools.count_total_result_files(results_project))
