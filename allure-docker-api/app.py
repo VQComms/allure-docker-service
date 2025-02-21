@@ -1707,16 +1707,16 @@ def write_test_counts_to_files(project_id, results_project, logger):
     total_count_file = get_project_skip_count_filepath(project_id)
 
     with open(pass_count_file, 'w') as f:
-        f.write(test_count_tools.count_passed_result_files(results_project, logger))
+        f.write(str(test_count_tools.count_passed_result_files(results_project, logger)))
 
     with open(fail_count_file, 'w') as f:
-        f.write(test_count_tools.count_failed_result_files(results_project, logger))
+        f.write(str(test_count_tools.count_failed_result_files(results_project, logger)))
 
     with open(skipped_count_file, 'w') as f:
-        f.write(test_count_tools.count_skipped_result_files(results_project, logger))
+        f.write(str(test_count_tools.count_skipped_result_files(results_project, logger)))
 
     with open(total_count_file, 'w') as f:
-        f.write(test_count_tools.count_total_result_files(results_project))
+        f.write(str(test_count_tools.count_total_result_files(results_project)))
 
 def resolve_project(project_id_param):
     project_id = 'default'

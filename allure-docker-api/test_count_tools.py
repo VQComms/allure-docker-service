@@ -10,8 +10,6 @@ def count_matching_files(directory, search_string, logger = None):
 
     for root, _, files in os.walk(directory):  # Walk through all files in the directory
         for file in files:
-            logger.info("file " + file)
-            
             file_path = os.path.join(root, file)
             try:
                 with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
