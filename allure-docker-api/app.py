@@ -1698,14 +1698,6 @@ def check_process(process_file, project_id):
     if proccount > 0:
         raise Exception("Processing files for project_id '{}'. Try later!".format(project_id))
 
-if __name__ == '__main__':
-    if DEV_MODE == 1:
-        LOGGER.info('Starting in DEV_MODE')
-        app.run(host=HOST, port=PORT)
-    else:
-        waitress.serve(app, threads=THREADS, host=HOST, port=PORT,
-                       url_scheme=URL_SCHEME, url_prefix=URL_PREFIX)
-
 #todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
 #todo: tighten up error handling and give proper error messages 
 def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
@@ -1716,13 +1708,20 @@ def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
             "Content-Type": "application/json",
         }
         data=json.dumps(f'-d "text=Report generated at {report_url}." -d "channel={slack_channel_name}"')
-    
+
         # Post to our slack test summary bot - summary message will appear in relevant channel of VQ Slack 
-        response = requests.post(url, headers=headers, json=data)  
+        response = requests.post(url, headers=headers, json=data)
         print(response.status_code)
         print(response.text)
-        
+
     except ex as e:
         print(f"Could not send summary to slack app, see {e} for exception.")
-        
+
+if __name__ == '__main__':
+    if DEV_MODE == 1:
+        LOGGER.info('Starting in DEV_MODE')
+        app.run(host=HOST, port=PORT)
+    else:
+        waitress.serve(app, threads=THREADS, host=HOST, port=PORT,
+                       url_scheme=URL_SCHEME, url_prefix=URL_PREFIX)
     
