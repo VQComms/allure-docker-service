@@ -13,6 +13,7 @@ import shutil
 import tempfile
 import subprocess
 import zipfile
+import requests
 import waitress
 from werkzeug.utils import secure_filename
 from flask import (
@@ -899,7 +900,7 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
             send_json_results(results_project, validated_results, processed_files, failed_files)
 
             if 'environment' in json_body:
-                send_environment_details(results_project, json_body['environment'], environment_details_sent)
+                send_environment_details(results_project, json_body['environment'])
                 environment_details_sent = True
 
         if content_type.startswith('multipart/form-data') is True:
@@ -927,6 +928,7 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
     else:
         if API_RESPONSE_LESS_VERBOSE != 1:
             body = {
+                #todo: could also save this data (or reuse these methods) when its relevant for slackbot summaries
                 'data': {
                     'current_files': files,
                     'current_files_count': current_files_count,
@@ -957,6 +959,8 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
 @app.route("/allure-docker-service/generate-report", strict_slashes=False)
 @jwt_required
 def generate_report_endpoint():
+    report_url = ""
+
     try:
         if check_admin_access(current_user) is False:
             return jsonify({ 'meta_data': { 'message': 'Access Forbidden' } }), 403
@@ -1043,6 +1047,18 @@ def generate_report_endpoint():
 
         resp = jsonify(body)
         resp.status_code = 200
+
+#todo: add option to disable the summary being sent and parse it in generate-endpoint query string 
+    if report_url is not "":
+        slack_channel_name = os.getenv('SLACK_SUMMARY_CHANNEL_NAME')
+        if slack_channel_name is None:
+            raise Exception("SLACK_SUMMARY_CHANNEL_NAME is not defined in system environment variables. Please set this to match the name of the slack channel used for updates.")
+
+        slack_bearer_token = os.getenv('SLACK_BEARER_TOKEN')
+        if slack_bearer_token is None:
+            raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
+
+        send_summary_to_slack_app(report_url, slack_channel_name, slack_bearer_token)
 
     return resp
 
@@ -1575,7 +1591,7 @@ def send_json_results(results_project, validated_results, processed_files, faile
                 file.close()
 
 
-def send_environment_details(results_project, environment_dict, environment_details_sent):
+def send_environment_details(results_project, environment_dict):
     file = None
 
     try:
@@ -1585,8 +1601,6 @@ def send_environment_details(results_project, environment_dict, environment_deta
     except Exception as ex:
         error = {}
         error['message'] = str(ex)
-    else:
-        environment_details_sent = True
 
     if file is not None:
         file.close()
@@ -1691,3 +1705,24 @@ if __name__ == '__main__':
     else:
         waitress.serve(app, threads=THREADS, host=HOST, port=PORT,
                        url_scheme=URL_SCHEME, url_prefix=URL_PREFIX)
+
+#todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
+#todo: tighten up error handling and give proper error messages 
+def send_summary_to_slack_app(report_url, slack_channel_name, bearer_token):
+    try:
+        url = "https://slack.com/api/chat.postMessage"  # URL for the slack app
+        headers = {
+            "Authorization": f"Bearer {bearer_token}",
+            "Content-Type": "application/json",
+        }
+        data=json.dumps(f'-d "text=Report generated at {report_url}." -d "channel={slack_channel_name}"')
+    
+        # Post to our slack test summary bot - summary message will appear in relevant channel of VQ Slack 
+        response = requests.post(url, headers=headers, json=data)  
+        print(response.status_code)
+        print(response.text)
+        
+    except ex as e:
+        print(f"Could not send summary to slack app, see {e} for exception.")
+        
+    
