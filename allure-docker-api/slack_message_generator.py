@@ -1,7 +1,9 @@
+import json
 from dataclasses import fields
 from re import search
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
+from slack_sdk.webhook import WebhookClient
 import requests
 import datetime
 
@@ -95,29 +97,28 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         
         #todo: tidy up 
         report_summary_fields = {
-            "Test Project": f"{project_name}",
-            "Url": f"{report_url}",
-            "Generated at": f"{project_generation_timestamp}",
-            "Total": f"{total_count}",
-            "Passed": f"{passed_count}",
-            "Failed": f"{failed_count}",
-            "Skipped": f"{skipped_count}",
-            "Pass Rate": f"{pass_rate:2f}%",
+            "project_name": f"{project_name}",
+            "url": f"{report_url}",
+            "generated_at_timestamp": f"{datetime.datetime.now().strftime('%d/%m/%y')}",
+            "total_test_count": total_count,
+            "passed_count": passed_count,
+            "failed_count": failed_count,
+            "skipped_count": skipped_count,
+            "pass_rate": pass_rate,
         }
 
         logger.info("summary json: " + str(report_summary_fields))
     
 
         #todo - improvement: send to new canvas if new project - populate existing one if not  
-        client.api_call(
-            api_method="canvas.listItems.add",
-            json={
-                "list": "T03C23TQH", #list id for slack channel with test summaries todo: make env var
-                "title": f"{report_url}", #todo: assign title and desc dynamically based on report passed 
-                "description": f"description for report {project_name}",
-                "fields": report_summary_fields
-            }
+        url = "https://hooks.slack.com/triggers/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"
+        webhook = WebhookClient(url)
+
+        response = webhook.send(
+            text = json.dumps(report_summary_fields)
         )
+
+        logger.info(response)
     
     except SlackApiError as e:
         logger.info(f"Slack API error: {e}")
