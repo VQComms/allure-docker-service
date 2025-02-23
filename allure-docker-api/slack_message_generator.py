@@ -114,8 +114,8 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         url = "https://hooks.slack.com/triggers/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"
         webhook = WebhookClient(url)
 
-        response = webhook.send(
-            text = json.dumps(report_summary_fields)
+        response = webhook.send_dict(
+            report_summary_fields
         )
 
         logger.info(response)
