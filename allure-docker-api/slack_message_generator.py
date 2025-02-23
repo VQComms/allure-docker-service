@@ -99,7 +99,7 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         report_summary_fields = {
             "project_name": f"{project_name}",
             "url": f"{report_url}",
-            "generated_at_timestamp": f"{datetime.datetime.now().strftime('%d/%m/%y')}",
+            "generated_at_timestamp": f"{datetime.datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}",
             "total_test_count": total_count,
             "passed_count": passed_count,
             "failed_count": failed_count,
