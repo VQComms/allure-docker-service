@@ -98,19 +98,22 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
             "Test Project": f"{project_name}",
             "Url": f"{report_url}",
             "Generated at": f"{project_generation_timestamp}",
-            "Total": total_count,
-            "Passed": passed_count,
-            "Failed": failed_count,
-            "Skipped": skipped_count,
+            "Total": f"{total_count}",
+            "Passed": f"{passed_count}",
+            "Failed": f"{failed_count}",
+            "Skipped": f"{skipped_count}",
             "Pass Rate": f"{pass_rate:2f}%",
         }
+
+        logger.info("summary json: " + str(report_summary_fields))
+    
 
         #todo - improvement: send to new canvas if new project - populate existing one if not  
         client.api_call(
             api_method="canvas.listItems.add",
             json={
                 "list": "T03C23TQH", #list id for slack channel with test summaries todo: make env var
-                "title": {report_url}, #todo: assign title and desc dynamically based on report passed 
+                "title": f"{report_url}", #todo: assign title and desc dynamically based on report passed 
                 "description": f"description for report {project_name}",
                 "fields": report_summary_fields
             }

@@ -1069,6 +1069,7 @@ def generate_report_endpoint():
         failed_count = read_count_from_file(get_test_count_filepath(project_id, "fail"))
         skipped_count = read_count_from_file(get_test_count_filepath(project_id, "skip"))
         total_count = read_count_from_file(get_test_count_filepath(project_id, "total"))
+
 #todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
         slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER,
                                                           passed_count, failed_count, skipped_count, total_count)
