@@ -1,3 +1,4 @@
+from dataclasses import fields
 from re import search
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -91,8 +92,31 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         )
 
         logger.info(response)
+        
+        #todo: tidy up 
+        report_summary_fields = {
+            "Test Project": f"{project_name}",
+            "Url": f"{report_url}",
+            "Generated at": f"{project_generation_timestamp}",
+            "Total": total_count,
+            "Passed": passed_count,
+            "Failed": failed_count,
+            "Skipped": skipped_count,
+            "Pass Rate": f"{pass_rate:2f}%",
+        }
+
+        #todo - improvement: send to new canvas if new project - populate existing one if not  
+        client.api_call(
+            api_method="canvas.listItems.add",
+            json={
+                "list": "T03C23TQH", #list id for slack channel with test summaries todo: make env var
+                "title": {report_url}, #todo: assign title and desc dynamically based on report passed 
+                "description": f"description for report {project_name}",
+                "fields": report_summary_fields
+            }
+        )
     
     except SlackApiError as e:
-        logger.info(f"Error sending sumamry to slack app: {e}")
+        logger.info(f"Slack API error: {e}")
 
     return
