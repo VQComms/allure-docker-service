@@ -1118,10 +1118,13 @@ def clean_history_endpoint():
     return resp
 
 
-@app.route("/runnerstatus", strict_slashes=False)
-@app.route("/allure-docker-service/runnerstatus", strict_slashes=False)
+@app.route("/runner-status",  methods=['POST'], strict_slashes=False)
+@app.route("/allure-docker-service/runner-status",  methods=['POST'], strict_slashes=False)
 @jwt_required
-def runner_statusendpoint():
+def runner_statuse_endpoint():
+
+    if not request.is_json:
+        raise Exception("Header 'Content-Type' is not 'application/json'")
 
     try:
         data = request.get_json()
