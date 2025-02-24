@@ -1117,6 +1117,34 @@ def clean_history_endpoint():
 
     return resp
 
+
+@app.route("/runnerstatus", strict_slashes=False)
+@app.route("/allure-docker-service/runnerstatus", strict_slashes=False)
+@jwt_required
+def runner_statusendpoint():
+
+    try:
+        data = request.get_json()
+        LOGGER.info(f"{data}")
+    except Exception as ex:
+        body = {
+            'meta_data': {
+                'message' : str(ex)
+            }
+        }
+        resp = jsonify(body)
+        resp.status_code = 400
+    else:
+        body = {
+            'meta_data': {
+                'message' : f"data received for runner {data}"
+            }
+        }
+        resp = jsonify(body)
+        resp.status_code = 200
+
+    return resp
+
 @app.route("/clean-results", strict_slashes=False)
 @app.route("/allure-docker-service/clean-results", strict_slashes=False)
 @jwt_required
