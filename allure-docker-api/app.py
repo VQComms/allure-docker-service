@@ -962,7 +962,7 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
 
 def convert_from_unix_timestamp_to_readable_str(unix_ms_timestamp):
     unix_time = unix_ms_timestamp / 1000
-    return datetime.datetime.fromtimestamp(unix_time).strftime('%H:%M:%S') 
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%H:%M:%S, %d %B %Y') 
 
 @app.route("/generate-report", strict_slashes=False)
 @app.route("/allure-docker-service/generate-report", strict_slashes=False)
