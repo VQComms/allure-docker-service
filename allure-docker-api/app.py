@@ -1078,8 +1078,8 @@ def generate_report_endpoint():
         test_start_times = [result.get("start") for result in results_object_list]
         test_stop_times = [result.get("stop") for result in results_object_list]
 
-        start_time = convert_from_unix_timestamp_to_readable_str(min(test_start_times))
-        stop_time = convert_from_unix_timestamp_to_readable_str(max(test_stop_times))
+        start_time = convert_from_unix_timestamp_to_readable_str(min(test_start_times, default=0))
+        stop_time = convert_from_unix_timestamp_to_readable_str(max(test_stop_times, default=0))
 
 #todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
         slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER,

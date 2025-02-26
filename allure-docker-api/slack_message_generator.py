@@ -9,7 +9,7 @@ import datetime
 
 #todo: add standard text representation for good practice - see docker api container logs at point of sending request
 def generate_slack_message(project_name, report_url, project_generation_timestamp, total_test_count, total_pass_count,
-                           total_fail_count, total_skipped_count, overall_pass_rate, total_test_run_period, watchers_list):
+                           total_fail_count, total_skipped_count, overall_pass_rate, total_test_run_period, watchers_list, start_time, stop_time):
     return {
         "blocks": [
             {
@@ -22,12 +22,15 @@ def generate_slack_message(project_name, report_url, project_generation_timestam
                     "text": (
                         f"Test report generated for project *{project_name}*\n"
                         f"📄 *Report URL:* {report_url}\n"
-                        f"🕒 *Generated at:* {project_generation_timestamp}\n"
                         f"📊 *Total number of tests:* {total_test_count}\n"
                         f"✅ *Total Passed:* {total_pass_count}\n"
                         f"❌ *Total Failed:* {total_fail_count}\n"
                         f"💨 *Total Skipped:* {total_skipped_count}\n"
                         f"📈 *Pass rate overall:* {overall_pass_rate:.2f}%\n"
+                        f"🎬 *Test Run Start Time:* {start_time}%\n"
+                        f"🏁 *Test Run Finish Time:* {stop_time}%\n"
+                        f"🕒 *Generated at:* {project_generation_timestamp}\n"
+                        
     #todo:                   f"⏳ *Time taken for test run:* {total_test_run_period}\n"
     #todo:                   f"👥 *FAO:* {watchers_list}\n"
                     )
@@ -87,7 +90,7 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         
         #todo: add skip_count
         slack_message = generate_slack_message(project_name, report_url, project_generation_timestamp, total_count, passed_count,
-                                               failed_count, skipped_count, pass_rate, "ages", watchers_list)
+                                               failed_count, skipped_count, pass_rate, "ages", watchers_list, start_time, stop_time)
         
         client = WebClient(token=bearer_token)
 
