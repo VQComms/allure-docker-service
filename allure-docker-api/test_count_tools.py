@@ -1,9 +1,7 @@
 import json
 import os
-import re
-import json
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import List, Optional, Dict, Any
 
 @dataclass
 class Label:
@@ -12,27 +10,42 @@ class Label:
 
 @dataclass
 class StatusDetails:
-    known: bool
-    muted: bool
-    flaky: bool
-    message: str
+    known: Optional[bool] = False
+    muted: Optional[bool] = False
+    flaky: Optional[bool] = False
+    message: Optional[str] = ""
+    trace: Optional[str] = None
+
+@dataclass
+class Step:
+    status: str
+    statusDetails: StatusDetails
+    stage: str
+    steps: List['Step'] = field(default_factory=list)
+    attachments: List[Any] = field(default_factory=list)
+    parameters: List[Dict[str, Any]] = field(default_factory=list)
+    start: int = 0
+    name: str = ""
+    stop: int = 0   
+
 
 @dataclass
 class TestResult:
     uuid: str
-    historyId: str
-    fullName: str
-    labels: List[Label]
-    links: List[str]
-    name: str
-    status: str
-    statusDetails: StatusDetails
-    stage: str
-    steps: List[str]
-    attachments: List[str]
-    parameters: List[str]
-    start: int
-    stop: int
+    historyId: Optional[str] = None
+    fullName: Optional[str] = None
+    labels: List[Label] = field(default_factory=list)
+    links: List[str] = field(default_factory=list)
+    name: str = ""
+    status: str = ""
+    statusDetails: StatusDetails = field(default_factory=StatusDetails)
+    stage: str = ""
+    steps: List[Step] = field(default_factory=list)
+    attachments: List[Any] = field(default_factory=list)
+    parameters: List[Dict[str, Any]] = field(default_factory=list)
+    start: int = 0
+    stop: int = 0
+    testCaseId: Optional[str] = None
 
 def convert_results_files_to_python_object_list(results_dir, logger):
     results_object_list = []
