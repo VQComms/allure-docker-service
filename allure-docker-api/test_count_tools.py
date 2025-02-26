@@ -1,36 +1,57 @@
+import json
 import os
 import re
+import json
+from dataclasses import dataclass
+from typing import List, Optional
 
-def count_matching_files(directory, search_string, logger = None):
-    match_count = 0
-    pattern = re.compile(re.escape(search_string))  # Compile regex for efficient searching
+@dataclass
+class Label:
+    name: str
+    value: str
+
+@dataclass
+class StatusDetails:
+    known: bool
+    muted: bool
+    flaky: bool
+    message: str
+
+@dataclass
+class TestResult:
+    uuid: str
+    historyId: str
+    fullName: str
+    labels: List[Label]
+    links: List[str]
+    name: str
+    status: str
+    statusDetails: StatusDetails
+    stage: str
+    steps: List[str]
+    attachments: List[str]
+    parameters: List[str]
+    start: int
+    stop: int
+
+def convert_results_files_to_python_object_list(results_dir, logger):
+    results_object_list = []
 
     if logger is not None:
-        logger.info("dir " + directory)
+        logger.info("results dir: " + results_dir)
 
-    for root, _, files in os.walk(directory):  # Walk through all files in the directory
-        for file in files:
-            file_path = os.path.join(root, file)
-            try:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    if any(pattern.search(line) for line in f):  # Check if any line contains the string
-                        match_count += 1
-            except Exception as e:
-                print(f"Skipping {file_path}: {e}")  # Handle errors like permission issues
+    results_files = [f for f in os.listdir(results_dir) if '-result.json' in f]
 
-    return match_count
+    for file_name in results_files:
+        logger.info("filename: " + file_name)
+        
+        with open(results_dir + file_name, 'r') as result_file:
+            data = json.load(result_file)
+            logger.info("file contents as json: " + data)
+            
+            results_object_list.append(TestResult(**data))
 
-def count_passed_result_files(results_dir, logger):
-    return count_matching_files(results_dir, '\"status\": \"passed\"', logger)
-
-def count_failed_result_files(results_dir, logger):
-    return count_matching_files(results_dir, '\"status\": \"failed\"', logger)
-
-def count_skipped_result_files(results_dir, logger):
-    return count_matching_files(results_dir, '\"status\": \"skipped\"', logger)
-
-def count_total_result_files(results_dir):
-    return len([f for f in os.listdir(results_dir) if '-result.json' in f])
+    return results_object_list
 
 def read_count_from_file(file_path):
     with open(file_path, 'r') as f:

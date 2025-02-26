@@ -1726,17 +1726,23 @@ def write_test_counts_to_files(project_id, results_project, logger):
     skipped_count_file = get_test_count_filepath(project_id, "skip")
     total_count_file = get_test_count_filepath(project_id, "total")
 
+    results_object_list = test_count_tools.convert_results_files_to_python_object_list(results_project, logger)
+
+    passed_tests_list = results_object_list[results_object_list["status"] == "passed"]
+    failed_tests_list = results_object_list[results_object_list["status"] == "failed"]
+    skipped_tests_list = results_object_list[results_object_list["status"] == "skipped"]
+
     with open(pass_count_file, 'w') as f:
-        f.write(str(test_count_tools.count_passed_result_files(results_project, logger)))
+        f.write(str(len(passed_tests_list)))
 
     with open(fail_count_file, 'w') as f:
-        f.write(str(test_count_tools.count_failed_result_files(results_project, logger)))
+        f.write(str(len(failed_tests_list)))
 
     with open(skipped_count_file, 'w') as f:
-        f.write(str(test_count_tools.count_skipped_result_files(results_project, logger)))
+        f.write(str(len(skipped_tests_list)))
 
     with open(total_count_file, 'w') as f:
-        f.write(str(test_count_tools.count_total_result_files(results_project)))
+        f.write(str(len(results_object_list)))
 
 def resolve_project(project_id_param):
     project_id = 'default'
