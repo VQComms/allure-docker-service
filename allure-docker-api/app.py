@@ -1728,9 +1728,9 @@ def write_test_counts_to_files(project_id, results_project, logger):
 
     results_object_list = test_count_tools.convert_results_files_to_python_object_list(results_project, logger)
 
-    passed_tests_list = results_object_list[results_object_list["status"] == "passed"]
-    failed_tests_list = results_object_list[results_object_list["status"] == "failed"]
-    skipped_tests_list = results_object_list[results_object_list["status"] == "skipped"]
+    passed_tests_list = [result for result in results_object_list if result.get("status") == "passed"]
+    failed_tests_list = [result for result in results_object_list if result.get("status") == "failed"]
+    skipped_tests_list = [result for result in results_object_list if result.get("status") == "skipped"]
 
     with open(pass_count_file, 'w') as f:
         f.write(str(len(passed_tests_list)))
