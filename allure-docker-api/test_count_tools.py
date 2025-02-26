@@ -60,7 +60,7 @@ def convert_results_files_to_python_object_list(results_dir, logger):
         
         with open(results_dir + '/' + file_name, 'r') as result_file:
             data = json.load(result_file)
-            logger.info("file contents as json: " + data)
+            logger.info("file contents as json: " + str(data))
             
             results_object_list.append(TestResult(**data))
 
