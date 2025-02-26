@@ -95,7 +95,7 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
 
         logger.info(response)
         
-        #todo: tidy up 
+        #todo: tidy up wrt above and below functions
         report_summary_fields = {
             "project_name": f"{project_name}",
             "url": f"{report_url}",

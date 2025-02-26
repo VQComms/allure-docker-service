@@ -1063,6 +1063,7 @@ def generate_report_endpoint():
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
         
+        #todo: could collect on runner and transfer over - but may be a bad idea since the ingress is already compliant because of allure here - here or send_results anyway 
         write_test_counts_to_files(project_id, results_project, LOGGER)
          
         passed_count = read_count_from_file(get_test_count_filepath(project_id, "pass"))
@@ -1110,37 +1111,6 @@ def clean_history_endpoint():
         body = {
             'meta_data': {
                 'message' : "History successfully cleaned for project_id '{}'".format(project_id)
-            }
-        }
-        resp = jsonify(body)
-        resp.status_code = 200
-
-    return resp
-
-
-@app.route("/runner-status",  methods=['POST'], strict_slashes=False)
-@app.route("/allure-docker-service/runner-status",  methods=['POST'], strict_slashes=False)
-@jwt_required
-def runner_statuse_endpoint():
-
-    if not request.is_json:
-        raise Exception("Header 'Content-Type' is not 'application/json'")
-
-    try:
-        data = request.get_json()
-        LOGGER.info(f"{data}")
-    except Exception as ex:
-        body = {
-            'meta_data': {
-                'message' : str(ex)
-            }
-        }
-        resp = jsonify(body)
-        resp.status_code = 400
-    else:
-        body = {
-            'meta_data': {
-                'message' : f"data received for runner {data}"
             }
         }
         resp = jsonify(body)
@@ -1719,7 +1689,6 @@ def get_test_count_filepath(project_id, prefix):
     project_path = get_project_path(project_id)
     return f'{project_path}/{prefix}_count.txt'
 
-
 def write_test_counts_to_files(project_id, results_project, logger):
     pass_count_file = get_test_count_filepath(project_id, "pass")
     fail_count_file = get_test_count_filepath(project_id, "fail")
@@ -1766,7 +1735,44 @@ def check_process(process_file, project_id):
     if proccount > 0:
         raise Exception("Processing files for project_id '{}'. Try later!".format(project_id))
 
-#todo: think about other params that would be useful here - e.g. start and finish times, name/IP of runner, where the report was generated from, etc 
+#todo: reorg this file so endpoints and other things are grouped appropriately 
+def update_or_add_test_runner_details(runner_dict):
+    #todo: this is going to have to come from the slack side unfortunately - we can't get an object's id here unelss it's created first (although could we not ONLY create from here and save it after? would need to freeze access on the page first though) 
+    #todo: but can we even check if an object exists if we recreate it each tine? I.e. we won't know when to delete 
+    # instead, register runners from this side and save to file. Every time we get a change in status reported from a runner, build a new message using blocks and send to the channel for reporting 
+    # could also trigger refreshes using links/modals in the block sent (linking back here)
+@app.route("/runner-status",  methods=['POST'], strict_slashes=False)
+@app.route("/allure-docker-service/runner-status",  methods=['POST'], strict_slashes=False)
+@jwt_required
+def runner_status_endpoint():
+    
+    if not request.is_json:
+        raise Exception("Header 'Content-Type' is not 'application/json'")
+
+    try:
+        data = request.get_json()
+        LOGGER.info(f"{data}")
+        update_or_add_test_runner_details(data)
+        
+    except Exception as ex:
+        body = {
+            'meta_data': {
+                'message' : str(ex)
+            }
+        }
+        resp = jsonify(body)
+        resp.status_code = 400
+    else:
+        body = {
+            'meta_data': {
+                'message' : f"data received for runner {data}"
+            }
+        }
+        resp = jsonify(body)
+        resp.status_code = 200
+        
+
+    return resp
 
 
 if __name__ == '__main__':
