@@ -58,7 +58,7 @@ def convert_results_files_to_python_object_list(results_dir, logger):
     for file_name in results_files:
         logger.info("filename: " + file_name)
         
-        with open(results_dir + file_name, 'r') as result_file:
+        with open(results_dir + '/' + file_name, 'r') as result_file:
             data = json.load(result_file)
             logger.info("file contents as json: " + data)
             
