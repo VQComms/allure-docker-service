@@ -4,6 +4,7 @@ from functools import wraps
 from subprocess import call
 import base64
 import datetime
+import time
 import glob
 import io
 import json
@@ -959,6 +960,10 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
         resp.status_code = 200
     return resp
 
+def convert_from_unix_timestamp_to_readable_str(unix_ms_timestamp):
+    unix_time = unix_ms_timestamp / 1000
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%H:%M:%S') 
+
 @app.route("/generate-report", strict_slashes=False)
 @app.route("/allure-docker-service/generate-report", strict_slashes=False)
 @jwt_required
@@ -1063,16 +1068,22 @@ def generate_report_endpoint():
             raise Exception("SLACK_BEARER_TOKEN is not defined in system environment variables. Please set this to the bearer token used by the slack app for test summaries.")
 
         
-        write_test_counts_to_files(project_id, results_project, LOGGER)
+        results_object_list = write_test_counts_to_files(project_id, results_project, LOGGER)
          
         passed_count = read_count_from_file(get_test_count_filepath(project_id, "pass"))
         failed_count = read_count_from_file(get_test_count_filepath(project_id, "fail"))
         skipped_count = read_count_from_file(get_test_count_filepath(project_id, "skip"))
         total_count = read_count_from_file(get_test_count_filepath(project_id, "total"))
+        
+        test_start_times = [result.get("start") for result in results_object_list]
+        test_stop_times = [result.get("stop") for result in results_object_list]
+
+        start_time = convert_from_unix_timestamp_to_readable_str(min(test_start_times))
+        stop_time = convert_from_unix_timestamp_to_readable_str(max(test_stop_times))
 
 #todo: may want to make this a separate endpoint - i.e. a 'generate slack summary' option - or add one so that we can toggle whether new reports are sent for a project at all  
         slack_message_generator.send_summary_to_slack_app(report_url, slack_channel_id, slack_bearer_token, LOGGER,
-                                                          passed_count, failed_count, skipped_count, total_count)
+                                                          passed_count, failed_count, skipped_count, total_count, start_time, stop_time)
 
     return resp
 
@@ -1719,7 +1730,7 @@ def get_test_count_filepath(project_id, prefix):
     project_path = get_project_path(project_id)
     return f'{project_path}/{prefix}_count.txt'
 
-
+#todo: break this up and move elsewhere
 def write_test_counts_to_files(project_id, results_project, logger):
     pass_count_file = get_test_count_filepath(project_id, "pass")
     fail_count_file = get_test_count_filepath(project_id, "fail")
@@ -1743,6 +1754,8 @@ def write_test_counts_to_files(project_id, results_project, logger):
 
     with open(total_count_file, 'w') as f:
         f.write(str(len(results_object_list)))
+        
+    return results_object_list
 
 def resolve_project(project_id_param):
     project_id = 'default'
