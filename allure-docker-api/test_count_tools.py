@@ -1,6 +1,6 @@
 import json
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import List, Optional, Dict, Any
 
 @dataclass
@@ -46,6 +46,10 @@ class TestResult:
     start: int = 0
     stop: int = 0
     testCaseId: Optional[str] = None
+
+    def get(self, key: str, default: Any = None) -> Any:
+        """ Mimics dictionary .get() method """
+        return asdict(self).get(key, default)
 
 def convert_results_files_to_python_object_list(results_dir, logger):
     results_object_list = []
