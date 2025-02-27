@@ -26,7 +26,7 @@ def generate_slack_message(project_name, report_url, project_generation_timestam
                         f"✅ *Total Passed:* {total_pass_count}\n"
                         f"❌ *Total Failed:* {total_fail_count}\n"
                         f"💨 *Total Skipped:* {total_skipped_count}\n"
-                        f"📈 *Pass rate overall:* {overall_pass_rate:.2f}\n"
+                        f"📈 *Pass rate overall:* {overall_pass_rate:.2f}%\n"
                         f"🎬 *Test Run Start Time:* {start_time}\n"
                         f"🏁 *Test Run Finish Time:* {stop_time}\n"
                         f"🕒 *Generated at:* {project_generation_timestamp}\n"
