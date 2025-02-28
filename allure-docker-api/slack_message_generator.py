@@ -86,8 +86,8 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         logger.info("stop time: " + stop_time)
 
         watchers_list = []
-        project_generation_timestamp = datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")
-        
+        project_generation_timestamp = datetime.datetime.now().strftime('%H:%M:%S, %d %B %Y')
+
         #todo: add skip_count
         slack_message = generate_slack_message(project_name, report_url, project_generation_timestamp, total_count, passed_count,
                                                failed_count, skipped_count, pass_rate, "ages", watchers_list, start_time, stop_time)
@@ -105,13 +105,15 @@ def send_summary_to_slack_app(report_url, slack_channel_id, bearer_token, logger
         report_summary_fields = {
             "project_name": f"{project_name}",
             "url": f"{report_url}",
-            "generated_at_timestamp": f"{datetime.datetime.now().strftime('%m/%d/%Y')}",
+            "generated_at_timestamp": f"{project_generation_timestamp}",
             "total_test_count": total_count,
             "passed_count": passed_count,
             "failed_count": failed_count,
             "skipped_count": skipped_count,
             "pass_rate": pass_rate,
-        }
+            "start_time": start_time,
+            "stop_time": stop_time,
+         }
 
         logger.info("summary json: " + str(report_summary_fields))
     
